@@ -1,5 +1,6 @@
 import dataclasses
 import requests
+import time
 import typing
 from uuid import uuid4
 
@@ -31,6 +32,13 @@ class ClientRoutes:
                                    ):
         return util.urljoin(self.endpoint,
                             f'/lol/summoner/v4/summoners/by-account/{account_id}',
+                            )
+
+    def get_summoner_by_summoner_id(self,
+                                    summoner_id: str,
+                                    ):
+        return util.urljoin(self.endpoint,
+                            f'/lol/summoner/v4/summoners/{summoner_id}',
                             )
 
     def get_matchlist_by_accountid(self,
@@ -73,26 +81,30 @@ class Client:
         self.routes = routes
 
     def _request(self, method: str,
-                 print_error: bool = True,
                  *args,
                  **kwargs):
-        res = requests.request(method=method,
-                               verify=False,
-                               *args, **kwargs)
-        if not res.ok:
-            msg = f'{method} request to url {res.url} failed with {res.status_code=} {res.reason=}'
-            if print_error:
-                print(msg)
-                print(res.text)
-            raise RiotAPINotOkayException(res=res,
-                                          msg=msg,
-                                          )
+        while True:
+            res = requests.request(method=method,
+                                   verify=False,
+                                   *args, **kwargs)
+            if res.ok:
+                break
+            else:
+                if res.status_code != 429:
+                    msg = f'{method} request to url {res.url} failed with {res.status_code=} {res.reason=}'
+                    raise RiotAPINotOkayException(res=res, msg=msg)
+
+                # triggered if quota limit is reached, add some delay to avoid firewall
+                time.sleep(5)
+
         return res
 
     def get_summoner_by_summonername(self,
                                      summoner_name: str,
+                                     print: bool = True,
                                      ):
-        logger.info(f'getting summoner {summoner_name}')
+        if print:
+            logger.info(f'getting summoner {summoner_name}')
         res = self._request(method='GET',
                             url=self.routes.get_summoner_by_summonername(summoner_name=summoner_name),
                             headers={'X-Riot-Token': self.config.token},
@@ -110,9 +122,25 @@ class Client:
     def get_summoner_by_account_id(self,
                                    account_id: str,
                                    ):
-        logger.info(f'getting summoner {account_id}')
         res = self._request(method='GET',
                             url=self.routes.get_summoner_by_account_id(account_id=account_id),
+                            headers={'X-Riot-Token': self.config.token},
+                            ).json()
+        return model.Summoner(
+            account_id=res['accountId'],
+            id=res['id'],
+            puuid=res['puuid'],
+            name=res['name'],
+            profile_icon_id=res['profileIconId'],
+            revision_date=res['revisionDate'],
+            summoner_level=res['summonerLevel'],
+        )
+
+    def get_summoner_by_summoner_id(self,
+                                    summoner_id: str,
+                                    ):
+        res = self._request(method='GET',
+                            url=self.routes.get_summoner_by_summoner_id(summoner_id=summoner_id),
                             headers={'X-Riot-Token': self.config.token},
                             ).json()
         return model.Summoner(
@@ -128,7 +156,6 @@ class Client:
     def get_match_details_by_matchid(self,
                                      match_id: int,
                                      ):
-        logger.info(f'getting match {match_id}')
         res = self._request(method='GET',
                             url=self.routes.get_match_by_matchid(match_id=match_id),
                             headers={'X-Riot-Token': self.config.token},
@@ -164,17 +191,25 @@ class Client:
             account_id: str = ''
             for participant_idendity in res['participantIdentities']:
                 if participant_idendity['participantId'] == participant['participantId']:
-                    account_id = participant_idendity['player']['accountId']
+
+                    # edge case, if region changed there are inconsistencies regarding account
+                    # id and sum name
+                    if participant_idendity['player']['platformId'] != 'EUW1':
+                        s = self.get_summoner_by_summoner_id(summoner_id=participant_idendity['player']['summonerId'],
+                                                             )
+                        account_id = s.account_id
+                    else:
+                        account_id = participant_idendity['player']['accountId']
 
             timeline = model.Timeline(
                 timeline_id=str(uuid4()),
-                creepsPerMinDeltas=participant['timeline']['creepsPerMinDeltas'],
-                xpPerMinDeltas=participant['timeline']['xpPerMinDeltas'],
-                goldPerMinDeltas=participant['timeline']['goldPerMinDeltas'],
-                csDiffPerMinDeltas=participant['timeline']['csDiffPerMinDeltas'],
-                xpDiffPerMinDeltas=participant['timeline']['xpDiffPerMinDeltas'],
-                damageTakenPerMinDeltas=participant['timeline']['damageTakenPerMinDeltas'],
-                damageTakenDiffPerMinDeltas=participant['timeline']['damageTakenDiffPerMinDeltas'],
+                creepsPerMinDeltas=participant['timeline']['creepsPerMinDeltas'] if 'creepsPerMinDeltas' in participant['timeline'].keys() else None,
+                xpPerMinDeltas=participant['timeline']['xpPerMinDeltas'] if 'xpPerMinDeltas' in participant['timeline'].keys() else None,
+                goldPerMinDeltas=participant['timeline']['goldPerMinDeltas'] if 'goldPerMinDeltas' in participant['timeline'].keys() else None,
+                csDiffPerMinDeltas=participant['timeline']['csDiffPerMinDeltas'] if 'csDiffPerMinDeltas' in participant['timeline'].keys() else None,
+                xpDiffPerMinDeltas=participant['timeline']['xpDiffPerMinDeltas'] if 'xpDiffPerMinDeltas' in participant['timeline'].keys() else None,
+                damageTakenPerMinDeltas=participant['timeline']['damageTakenPerMinDeltas'] if 'damageTakenPerMinDeltas' in participant['timeline'].keys() else None,
+                damageTakenDiffPerMinDeltas=participant['timeline']['damageTakenDiffPerMinDeltas'] if 'damageTakenDiffPerMinDeltas' in participant['timeline'].keys() else None,
             )
 
             stat = model.Stat(
@@ -226,20 +261,20 @@ class Client:
                 turretKills=participant['stats']['turretKills'],
                 inhibitorKills=participant['stats']['inhibitorKills'],
                 totalMinionsKilled=participant['stats']['totalMinionsKilled'],
-                neutralMinionsKilledTeamJungle=participant['stats']['neutralMinionsKilledTeamJungle'],
-                neutralMinionsKilledEnemyJungle=participant['stats']['neutralMinionsKilledEnemyJungle'],
+                neutralMinionsKilledTeamJungle=participant['stats']['neutralMinionsKilledTeamJungle'] if 'neutralMinionsKilledTeamJungle' in participant['stats'].keys() else None,
+                neutralMinionsKilledEnemyJungle=participant['stats']['neutralMinionsKilledEnemyJungle'] if 'neutralMinionsKilledEnemyJungle' in participant['stats'].keys() else None,
                 totalTimeCrowdControlDealt=participant['stats']['totalTimeCrowdControlDealt'],
                 champLevel=participant['stats']['champLevel'],
                 visionWardsBoughtInGame=participant['stats']['visionWardsBoughtInGame'],
                 sightWardsBoughtInGame=participant['stats']['sightWardsBoughtInGame'],
-                wardsPlaced=participant['stats']['wardsPlaced'],
-                wardsKilled=participant['stats']['wardsKilled'],
-                firstBloodKill=participant['stats']['firstBloodKill'],
-                firstBloodAssist=participant['stats']['firstBloodAssist'],
-                firstTowerKill=participant['stats']['firstTowerKill'],
-                firstTowerAssist=participant['stats']['firstTowerAssist'],
-                firstInhibitorKill=participant['stats']['firstInhibitorKill'],
-                firstInhibitorAssist=participant['stats']['firstInhibitorAssist'],
+                wardsPlaced=participant['stats']['wardsPlaced'] if 'wardsPlaced' in participant['stats'].keys() else None,
+                wardsKilled=participant['stats']['wardsKilled'] if 'wardsKilled' in participant['stats'].keys() else None,
+                firstBloodKill=participant['stats']['firstBloodKill'] if 'firstBloodKill' in participant['stats'].keys() else None,
+                firstBloodAssist=participant['stats']['firstBloodAssist'] if 'firstBloodAssist' in participant['stats'].keys() else None,
+                firstTowerKill=participant['stats']['firstTowerKill'] if 'firstTowerKill' in participant['stats'].keys() else None,
+                firstTowerAssist=participant['stats']['firstTowerAssist'] if 'firstTowerAssist' in participant['stats'].keys() else None,
+                firstInhibitorKill=participant['stats']['firstInhibitorKill'] if 'firstInhibitorKill' in participant['stats'].keys() else None,
+                firstInhibitorAssist=participant['stats']['firstInhibitorAssist'] if 'firstInhibitorAssist' in participant['stats'].keys() else None,
                 combatPlayerScore=participant['stats']['combatPlayerScore'],
                 objectivePlayerScore=participant['stats']['objectivePlayerScore'],
                 totalPlayerScore=participant['stats']['totalPlayerScore'],

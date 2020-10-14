@@ -125,8 +125,8 @@ def insert_timeline(conn,
 
 
 def insert_stat(conn,
-                    stat: model.Stat
-                    ):
+                stat: model.Stat
+                ):
     statement = "INSERT INTO stats " \
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     values = dataclasses.astuple(stat)
@@ -171,7 +171,7 @@ def insert_match(conn,
                  match: model.Match
                  ):
     statement = "INSERT INTO matches " \
-                "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
     teams: typing.List[str] = []
     for team in match.teams:
