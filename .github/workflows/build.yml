@@ -1,4 +1,4 @@
-name: Build, tag and push image
+name: Build
 
 on:
   workflow_dispatch:
