@@ -25,5 +25,5 @@ ENV DBPASSWD=$DBPASSWD_ARG
 ENV DB=$DB_ARG
 ENV RIOT_API_TOKEN=$RIOT_API_TOKEN
 ENV PYTHONPATH "/src/"
-ENTRYPOINT ["python3", "-m", "main.py"]
+ENTRYPOINT ["python3", "/src/main.py"]
 
