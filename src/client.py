@@ -4,10 +4,7 @@ import time
 import typing
 from uuid import uuid4
 
-
-import model
-import util
-
+from src import util, model
 
 # init logger
 logger = util.Logger(__name__)

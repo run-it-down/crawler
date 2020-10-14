@@ -1,6 +1,6 @@
 import dataclasses
 import json
-import model
+from src import model
 import os
 import psycopg2
 import typing

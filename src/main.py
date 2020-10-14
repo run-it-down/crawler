@@ -1,12 +1,6 @@
-import client
-import database
 import os
 import urllib3
-import util
-
-
-import model
-
+from src import util, model, client, database
 
 # init logger
 logger = util.Logger(__name__)
@@ -61,57 +55,61 @@ if __name__ == '__main__':
     logger.info('testing database connection')
     conn = database.get_connection()
 
-    # summoner
-    summoner = client.get_summoner_by_summonername(summoner_name=os.getenv('SUMMONER_NAME'))
-    database.insert_summoner(conn=conn,
-                             summoner=summoner,
-                             )
+    summoner_names = ['Zeekay', 'Donkey Vo']
 
-    # matchlist
-    matchlist = get_matchlist_updates(summoner=summoner)
-    for match_ref in matchlist.match_references:
-        database.insert_summoner_match(conn=conn,
-                                       game_id=match_ref.game_id,
-                                       account_id=summoner.account_id,
-                                       )
+    for summoner_name in summoner_names:
 
-    # matchdetails
-    i = 1
-    for match_ref in matchlist.match_references:
-        logger.info(f'getting match {match_ref.game_id} ({i}/{len(matchlist.match_references)})')
-        match = client.get_match_details_by_matchid(match_id=match_ref.game_id)
-        if match.game_mode == 'ARAM':
-            continue
+        # summoner
+        summoner = client.get_summoner_by_summonername(summoner_name=summoner_name)
+        database.insert_summoner(conn=conn,
+                                 summoner=summoner,
+                                 )
 
-        # insert team
-        for team in match.teams:
-            database.insert_team(conn=conn,
-                                 team=team)
+        # matchlist
+        matchlist = get_matchlist_updates(summoner=summoner)
+        for match_ref in matchlist.match_references:
+            database.insert_summoner_match(conn=conn,
+                                           game_id=match_ref.game_id,
+                                           account_id=summoner.account_id,
+                                           )
 
-        for participant in match.participants:
+        # matchdetails
+        i = 1
+        for match_ref in matchlist.match_references:
+            logger.info(f'getting match {match_ref.game_id} ({i}/{len(matchlist.match_references)})')
+            match = client.get_match_details_by_matchid(match_id=match_ref.game_id)
+            if match.game_mode == 'ARAM':
+                continue
 
-            # insert timeline
-            database.insert_timeline(conn,
-                                     timeline=participant.timeline)
+            # insert team
+            for team in match.teams:
+                database.insert_team(conn=conn,
+                                     team=team)
 
-            # insert stat
-            database.insert_stat(conn,
-                                 stat=participant.stat)
+            for participant in match.participants:
 
-            # insert participating summoners
-            s = client.get_summoner_by_account_id(account_id=participant.account_id)
-            database.insert_summoner(conn=conn,
-                                     summoner=s,
-                                     )
+                # insert timeline
+                database.insert_timeline(conn,
+                                         timeline=participant.timeline)
 
-            # insert participant
-            database.insert_participant(conn=conn,
-                                        participant=participant)
+                # insert stat
+                database.insert_stat(conn,
+                                     stat=participant.stat)
 
-        # insert match
-        database.insert_match(conn=conn,
-                              match=match)
+                # insert participating summoners
+                s = client.get_summoner_by_account_id(account_id=participant.account_id)
+                database.insert_summoner(conn=conn,
+                                         summoner=s,
+                                         )
 
-        i += 1
+                # insert participant
+                database.insert_participant(conn=conn,
+                                            participant=participant)
 
-    database.kill_connection(conn)
+            # insert match
+            database.insert_match(conn=conn,
+                                  match=match)
+
+            i += 1
+
+        database.kill_connection(conn)
