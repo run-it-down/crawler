@@ -1,9 +1,10 @@
 import dataclasses
 import json
-from src import model
 import os
 import psycopg2
 import typing
+
+import model
 
 
 def get_connection(
