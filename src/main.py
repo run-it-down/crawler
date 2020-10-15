@@ -71,6 +71,7 @@ if __name__ == '__main__':
 
         # matchlist
         matchlist = get_matchlist_updates(summoner=summoner)
+        matchlist = matchlist[0:99]
         for match_ref in matchlist.match_references:
             database.insert_summoner_match(conn=conn,
                                            game_id=match_ref.game_id,
