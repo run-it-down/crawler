@@ -82,7 +82,7 @@ if __name__ == '__main__':
         for match_ref in matchlist.match_references:
             logger.info(f'getting match {match_ref.game_id} ({i}/{len(matchlist.match_references)})')
             match = client.get_match_details_by_matchid(match_id=match_ref.game_id)
-            if match.game_mode == 'ARAM':
+            if match.game_mode != 'CLASSIC':
                 continue
 
             # insert team
