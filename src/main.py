@@ -56,12 +56,11 @@ if __name__ == '__main__':
                            routes=routes,
                            )
 
-    logger.info('testing database connection')
-    conn = database.get_connection()
-
     summoner_names = ['Zeekay', 'Donkey Vo']
 
     for summoner_name in summoner_names:
+
+        conn = database.get_connection()
 
         # summoner
         summoner = client.get_summoner_by_summonername(summoner_name=summoner_name)
