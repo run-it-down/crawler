@@ -33,7 +33,6 @@ jobs:
             DBUSER_ARG=postgres
             DBPASSWD_ARG=${{ secrets.DBPASSWD }}
             DB_ARG=run-it-down
-            RIOT_API_TOKEN=${{ secrets.RIOT_API_TOKEN }}
           context: .
           file: ./Dockerfile
           tags: |
