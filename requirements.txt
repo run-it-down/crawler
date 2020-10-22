@@ -1,3 +1,4 @@
+falcon==2.0.0
 psycopg2-binary==2.8.6
 urllib3==1.25.10
 requests~=2.24.0
