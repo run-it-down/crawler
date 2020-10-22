@@ -23,5 +23,5 @@ ENV DBUSER=$DBUSER_ARG
 ENV DBPASSWD=$DBPASSWD_ARG
 ENV DB=$DB_ARG
 ENV PYTHONPATH "/src/"
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000", "src.api", "--timeout", "600"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8002", "src.api", "--timeout", "600"]
 
