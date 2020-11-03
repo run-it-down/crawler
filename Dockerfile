@@ -19,6 +19,7 @@ RUN mkdir /root/.ssh/
 RUN echo $SSH_PRIVATE_KEY >> /root/.ssh/id_rsa
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+RUN chmod 400 root/.ssh/id_rsa
 RUN git clone git@github.com:run-it-down/common.git /common
 
 ADD crawler /crawler/
