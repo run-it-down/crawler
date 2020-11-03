@@ -33,6 +33,7 @@ jobs:
             DBUSER_ARG=postgres
             DBPASSWD_ARG=${{ secrets.DBPASSWD }}
             DB_ARG=run-it-down
+            SSH_PRIVATE_KEY=${{ secrets.ZKDEV_SSH_KEY }}
           context: .
           file: ./Dockerfile
           tags: |
