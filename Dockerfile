@@ -6,6 +6,7 @@ RUN apk add python3
 RUN apk add --update py-pip
 RUN pip install --upgrade pip
 RUN apk add git
+RUN apk add --no-cache openssh-client
 
 ARG DBHOST_ARG
 ARG DBPORT_ARG
