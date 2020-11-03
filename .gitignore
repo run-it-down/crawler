@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 # zkdev
-src/playground.py
+crawler/playground.py
+.idea/

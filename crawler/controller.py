@@ -1,7 +1,10 @@
 import client
-import database
-import model
-import util
+try:
+    import database
+    import model
+    import util
+except ModuleNotFoundError:
+    print('common package not in python path')
 
 
 logger = util.Logger(__name__)

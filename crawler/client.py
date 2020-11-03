@@ -4,8 +4,12 @@ import time
 import typing
 from uuid import uuid4
 
-import model
-import util
+try:
+    import model
+    import util
+except ModuleNotFoundError:
+    print('common package not in python path')
+
 
 # init logger
 logger = util.Logger(__name__)
