@@ -23,5 +23,4 @@ ENV DBUSER=$DBUSER_ARG
 ENV DBPASSWD=$DBPASSWD_ARG
 ENV DB=$DB_ARG
 ENV PYTHONPATH "/crawler/"
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8000", "crawler.api", "--timeout", "600"]
-
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8002", "crawler.api", "--timeout", "600"]
