@@ -14,9 +14,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: 'run-it-down/common'
-          token: ${{ secrets.ZKDEV_PULL_COMMON }}
           path: 'common/'
-      
+          ssh-key: ${{ secrets.ZKDEV_SSH_KEY }}
+               
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       
