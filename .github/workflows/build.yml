@@ -7,8 +7,15 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout crawler
         uses: actions/checkout@v2
+        
+      - name: Checkout common
+        uses: actions/checkout@v2
+        with:
+          repository: 'run-it-down/common'
+          token: ${{ secrets.ZKDEV_PULL_COMMON }}
+          path: 'common/'
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
