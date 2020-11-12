@@ -5,6 +5,7 @@ import typing
 from uuid import uuid4
 
 try:
+    import dtos.summoner
     import model
     import util
 except ModuleNotFoundError:
@@ -103,15 +104,12 @@ class Client:
 
     def get_summoner_by_summonername(self,
                                      summoner_name: str,
-                                     print: bool = True,
                                      ):
-        if print:
-            logger.info(f'getting summoner {summoner_name}')
         res = self._request(method='GET',
                             url=self.routes.get_summoner_by_summonername(summoner_name=summoner_name),
                             headers={'X-Riot-Token': self.config.token},
                             ).json()
-        return model.Summoner(
+        return dtos.summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
             puuid=res['puuid'],
