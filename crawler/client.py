@@ -126,7 +126,7 @@ class Client:
                             url=self.routes.get_summoner_by_account_id(account_id=account_id),
                             headers={'X-Riot-Token': self.config.token},
                             ).json()
-        return model.Summoner(
+        return dtos.summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
             puuid=res['puuid'],
