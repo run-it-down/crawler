@@ -2,11 +2,11 @@ import dataclasses
 import requests
 import time
 import typing
-from uuid import uuid4
 
 try:
     import dtos.summoner
     import dtos.match
+    import dtos.matchlist
     import model
     import util
 except ModuleNotFoundError:
@@ -405,25 +405,26 @@ class Client:
                                     },
                             ).json()
 
-        matches: typing.List[model.MatchReference] = []
-        for entry in res['matches']:
-            match = model.MatchReference(
-                game_id=entry['gameId'],
-                platform_id=entry['platformId'],
-                lane=entry['lane'],
-                role=entry['role'],
-                season=entry['season'],
-                champion=entry['champion'],
-                queue=entry['queue'],
-                timestamp=entry['timestamp'],
-            )
-            matches.append(match)
+        matches = []
+        for match in res['matches']:
+            matches.append(dtos.matchlist.MatchReferenceDto(
+                game_id=match['gameId'],
+                role=match['role'],
+                season=match['season'],
+                platform_id=match['platformId'],
+                champion=match['champion'],
+                queue=match['queue'],
+                lane=match['lane'],
+                timestamp=match['timestamp'],
+            ))
 
-        return model.Matchlist(
-            start_index=res['startIndex'],
+        return dtos.matchlist.MatchlistDto(
+            start_index=res['beginIndex'],
+            total_games=res['totalGames'],
             end_index=res['endIndex'],
-            match_references=matches,
+            matches=matches,
         )
+
 
     def get_match_timeline_by_matchid(self,
                                       match_id: str,
