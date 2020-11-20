@@ -477,11 +477,11 @@ class Client:
                     monster_sub_type=event['monsterSubType'],
                     team_id=event['teamId'],
                     position=position,
-                    killer_id = event['killerID'],
-                    timestamp = event['timestamp'],
+                    killer_id=event['killerID'],
+                    timestamp=event['timestamp'],
                     assisting_participant_ids=event['assisting_participant_ids'],
-                    building_type = event['buildingType'],
-                    victim_id = event['victimId'],
+                    building_type=event['buildingType'],
+                    victim_id=event['victimId'],
                 ))
 
             frames.append(dtos.match_timeline.MatchFrameDto(
