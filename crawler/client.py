@@ -1,12 +1,12 @@
 import dataclasses
 import requests
 import time
-import typing
 
 try:
     import dtos.summoner
     import dtos.match
     import dtos.matchlist
+    import dtos.match_timeline
     import model
     import util
 except ModuleNotFoundError:
@@ -391,7 +391,6 @@ class Client:
             participants=participants,
         )
 
-
     def get_matchlist_by_accountid(self,
                                    account_id: str,
                                    begin_index=0,
@@ -425,7 +424,6 @@ class Client:
             matches=matches,
         )
 
-
     def get_match_timeline_by_matchid(self,
                                       match_id: str,
                                       ):
@@ -434,23 +432,65 @@ class Client:
                             headers={'X-Riot-Token': self.config.token},
                             ).json()
 
-        matches: typing.List[model.MatchReference] = []
-        for entry in res['matches']:
-            match = model.MatchReference(
-                game_id=entry['gameId'],
-                platform_id=entry['platformId'],
-                lane=entry['lane'],
-                role=entry['role'],
-                season=entry['season'],
-                champion=entry['champion'],
-                queue=entry['queue'],
-                timestamp=entry['timestamp'],
-            )
-            matches.append(match)
+        frames = []
+        for frame in res['frames']:
+            participants_frames = {}
+            for participants_frame_key in frame['participantsFrames'].keys():
+                participants_frames[participants_frame_key] = dtos.match_timeline.MatchParticipantFrameDto(
+                    participant_id=frame['participantsFrames'][participants_frame_key]['participantId'],
+                    minions_killed=frame['participantsFrames'][participants_frame_key]['minionsKilled'],
+                    team_score=frame['participantsFrames'][participants_frame_key]['teamScore'],
+                    dominion_score=frame['participantsFrames'][participants_frame_key]['dominionScore'],
+                    total_gold=frame['participantsFrames'][participants_frame_key]['totalGold'],
+                    level=frame['participantsFrames'][participants_frame_key]['level'],
+                    xp=frame['participantsFrames'][participants_frame_key]['xp'],
+                    current_gold=frame['participantsFrames'][participants_frame_key]['currentGold'],
+                    position=dtos.match_timeline.MatchPositionDto(
+                        x=frame['participantsFrames'][participants_frame_key]['position']['x'],
+                        y=frame['participantsFrames'][participants_frame_key]['position']['y'],
+                    ),
+                    jungle_minions_killed=frame['participantsFrames'][participants_frame_key]['jungleMinionsKilled'],
+                )
 
+            events = []
+            for event in frame['events']:
+                position = dtos.match_timeline.MatchPositionDto(
+                    x=event['position']['x'],
+                    y=event['position']['y'],
+                )
+                events.append(dtos.match_timeline.MatchEventDto(
+                    lane_type=event['laneType'],
+                    skill_slot=event['skillShot'],
+                    ascended_type=event['ascendedType'],
+                    creator_id=event['creatorId'],
+                    after_id=event['afterId'],
+                    event_type=event['eventType'],
+                    type=event['type'],
+                    level_up_type=event['levelUpType'],
+                    ward_type=event['wardType'],
+                    participant_id=event['participantId'],
+                    tower_type=event['towerType'],
+                    item_id=event['itemId'],
+                    before_id=event['beforeId'],
+                    point_captured=event['pointCaptured'],
+                    monster_type=event['monsterType'],
+                    monster_sub_type=event['monsterSubType'],
+                    team_id=event['teamId'],
+                    position=position,
+                    killer_id = event['killerID'],
+                    timestamp = event['timestamp'],
+                    assisting_participant_ids=event['assisting_participant_ids'],
+                    building_type = event['buildingType'],
+                    victim_id = event['victimId'],
+                ))
 
+            frames.append(dtos.match_timeline.MatchFrameDto(
+                participant_frames=participants_frames,
+                events=events,
+                timestamp=frame['timestamp'],
+            ))
 
-        return model.MatchTimeline(
-            participant_frames=[],
-            event_frames=[]
+        return dtos.match_timeline.MatchTimelineDto(
+            frames=frames,
+            frame_interval=res['frameInterval']
         )
