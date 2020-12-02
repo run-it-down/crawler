@@ -49,3 +49,6 @@ def create():
 
 
 application = create()
+
+from waitress import serve
+serve(application, host="localhost", port=1000)
