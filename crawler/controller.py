@@ -10,7 +10,6 @@ logger = util.Logger(__name__)
 
 
 def post_summoner(riot_client: client.Client,
-                  game_range: tuple,
                   summoner_name: str = None,
                   ):
     conn = database.get_connection()
@@ -20,9 +19,9 @@ def post_summoner(riot_client: client.Client,
                                        conn=conn,
                                        riot_client=riot_client,
                                        )
-    if game_range:
-        matchlist.matches = matchlist.matches[game_range[0]:game_range[1]]
-    for match_ref in matchlist.matches:
+
+    # TODO remove hardcoded gamerange
+    for match_ref in matchlist.matches[:3]:
         logger.info(msg=f"Crawling match {match_ref.game_id}...")
         match = riot_client.get_match_by_matchid(match_ref.game_id)
         database.insert_match(conn=conn, match=rid_parser.parse_match(match_dto=match))
