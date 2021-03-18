@@ -31,7 +31,7 @@ class Summoner:
 
         controller.post_summoner(riot_client=riot_client,
                                  summoner_name=body['summonerName'],
-                                 game_range=(body['startIndex'], body['endIndex']),
+                                 game_range=(body['startIndex'], body['endIndex']) if body.get('startIndex') and body.get('endIndex') else None,
                                  )
         resp.status = falcon.HTTP_201
 

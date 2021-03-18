@@ -20,7 +20,8 @@ def post_summoner(riot_client: client.Client,
                                        conn=conn,
                                        riot_client=riot_client,
                                        )
-    matchlist.matches = matchlist.matches[game_range[0]:game_range[1]]
+    if game_range:
+        matchlist.matches = matchlist.matches[game_range[0]:game_range[1]]
     for match_ref in matchlist.matches:
         logger.info(msg=f"Crawling match {match_ref.game_id}...")
         match = riot_client.get_match_by_matchid(match_ref.game_id)
