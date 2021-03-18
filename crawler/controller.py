@@ -65,7 +65,6 @@ def post_summoner(riot_client: client.Client,
                                                        timeline_id=timeline.timeline_id,
                                                        role=participant_dto.timeline.role,
                                                        lane=participant_dto.timeline.lane,
-                                                       team_id=participant_dto.team_id
                                                        )
             database.insert_participant(conn=conn, participant=participant)
             participants[participant_dto.participant_id] = participant.participant_id  # map id to uuid
