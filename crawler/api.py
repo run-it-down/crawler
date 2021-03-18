@@ -18,7 +18,7 @@ logger = util.Logger(__name__)
 class Summoner:
 
     def on_post(self, req, resp):
-        logger.info('POST /summoner')
+        logger.info('crawling')
         body = json.loads(req.stream.read())
 
         # we dont check tls certificates so surpress the warning
@@ -38,7 +38,7 @@ class Summoner:
 
 def create():
     api = falcon.API()
-    api.add_route('/summoner', Summoner())
+    api.add_route('/', Summoner())
     logger.info('falcon initialized')
 
     conn = database.get_connection()
