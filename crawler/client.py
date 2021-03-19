@@ -31,7 +31,7 @@ class ClientRoutes:
     ):
         return util.urljoin(
             self.endpoint,
-            util.urljoin('/lol/summoner/v4/summoners/by-name/', summoner_name),
+            util.urljoin('/lol/summoner/v4/summoners/by-name/', str(summoner_name)),
         )
 
     def get_summoner_by_account_id(
@@ -40,7 +40,7 @@ class ClientRoutes:
     ):
         return util.urljoin(
             self.endpoint,
-            util.urljoin('/lol/summoner/v4/summoners/by-account/', account_id),
+            util.urljoin('/lol/summoner/v4/summoners/by-account/', str(account_id)),
         )
 
     def get_summoner_by_summoner_id(
@@ -49,7 +49,7 @@ class ClientRoutes:
     ):
         return util.urljoin(
             self.endpoint,
-            util.urljoin('/lol/summoner/v4/summoners/', summoner_id),
+            util.urljoin('/lol/summoner/v4/summoners/', str(summoner_id)),
         )
 
     def get_matchlist_by_accountid(
@@ -58,7 +58,7 @@ class ClientRoutes:
     ):
         return util.urljoin(
             self.endpoint,
-            util.urljoin('/lol/match/v4/matchlists/by-account/', account_id),
+            util.urljoin('/lol/match/v4/matchlists/by-account/', str(account_id)),
         )
 
     def get_match_by_matchid(
@@ -67,7 +67,7 @@ class ClientRoutes:
     ):
         return util.urljoin(
             self.endpoint,
-            util.urljoin('/lol/match/v4/matches/', match_id),
+            util.urljoin('/lol/match/v4/matches/', str(match_id)),
         )
 
     def get_match_timeline_by_matchid(
@@ -75,7 +75,7 @@ class ClientRoutes:
         match_id: str):
         return util.urljoin(
             self.endpoint,
-            util.urljoin('/lol/match/v4/timelines/by-match/', match_id),
+            util.urljoin('/lol/match/v4/timelines/by-match/', str(match_id)),
         )
 
 
