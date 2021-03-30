@@ -484,7 +484,7 @@ class Client:
                     position=position,
                     killer_id=event.get('killerId'),
                     timestamp=event.get('timestamp'),
-                    assisting_participant_ids=event.get('assisting_participant_ids'),
+                    assisting_participant_ids=event.get('assistingParticipantIds'),
                     building_type=event.get('buildingType'),
                     victim_id=event.get('victimId'),
                 ))
