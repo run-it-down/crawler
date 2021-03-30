@@ -19,49 +19,64 @@ logger = util.Logger(__name__)
 
 class ClientRoutes:
 
-    def __init__(self,
-                 endpoint: str,
-                 ):
+    def __init__(
+        self,
+        endpoint: str,
+    ):
         self.endpoint = endpoint
 
-    def get_summoner_by_summonername(self,
-                                     summoner_name: str,
-                                     ):
-        return util.urljoin(self.endpoint,
-                            f'/lol/summoner/v4/summoners/by-name/{summoner_name}',
-                            )
+    def get_summoner_by_summonername(
+        self,
+        summoner_name: str,
+    ):
+        return util.urljoin(
+            self.endpoint,
+            util.urljoin('/lol/summoner/v4/summoners/by-name/', str(summoner_name)),
+        )
 
-    def get_summoner_by_account_id(self,
-                                   account_id: str,
-                                   ):
-        return util.urljoin(self.endpoint,
-                            f'/lol/summoner/v4/summoners/by-account/{account_id}',
-                            )
+    def get_summoner_by_account_id(
+        self,
+        account_id: str,
+    ):
+        return util.urljoin(
+            self.endpoint,
+            util.urljoin('/lol/summoner/v4/summoners/by-account/', str(account_id)),
+        )
 
-    def get_summoner_by_summoner_id(self,
-                                    summoner_id: str,
-                                    ):
-        return util.urljoin(self.endpoint,
-                            f'/lol/summoner/v4/summoners/{summoner_id}',
-                            )
+    def get_summoner_by_summoner_id(
+        self,
+        summoner_id: str,
+    ):
+        return util.urljoin(
+            self.endpoint,
+            util.urljoin('/lol/summoner/v4/summoners/', str(summoner_id)),
+        )
 
-    def get_matchlist_by_accountid(self,
-                                   account_id: str):
-        return util.urljoin(self.endpoint,
-                            f'/lol/match/v4/matchlists/by-account/{account_id}',
-                            )
+    def get_matchlist_by_accountid(
+        self,
+        account_id: str
+    ):
+        return util.urljoin(
+            self.endpoint,
+            util.urljoin('/lol/match/v4/matchlists/by-account/', str(account_id)),
+        )
 
-    def get_match_by_matchid(self,
-                             match_id: int):
-        return util.urljoin(self.endpoint,
-                            f'/lol/match/v4/matches/{match_id}',
-                            )
+    def get_match_by_matchid(
+        self,
+        match_id: int
+    ):
+        return util.urljoin(
+            self.endpoint,
+            util.urljoin('/lol/match/v4/matches/', str(match_id)),
+        )
 
-    def get_match_timeline_by_matchid(self,
-                                      match_id: str):
-        return util.urljoin(self.endpoint,
-                            f'/lol/match/v4/timelines/by-match/{match_id}',
-                            )
+    def get_match_timeline_by_matchid(
+        self,
+        match_id: str):
+        return util.urljoin(
+            self.endpoint,
+            util.urljoin('/lol/match/v4/timelines/by-match/', str(match_id)),
+        )
 
 
 @dataclasses.dataclass()
@@ -70,33 +85,43 @@ class ClientConfig:
 
 
 class RiotAPINotOkayException(Exception):
-    def __init__(self,
-                 res: requests.Response,
-                 msg: str,
-                 *args,
-                 **kwargs):
-        super().__init__(*args,
-                         **kwargs)
+    def __init__(
+        self,
+        res: requests.Response,
+        msg: str,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(
+            *args,
+            **kwargs,
+        )
         self.res = res
         self.msg = msg
 
 
 class Client:
 
-    def __init__(self,
-                 config: ClientConfig,
-                 routes: ClientRoutes,
-                 ):
+    def __init__(
+        self,
+        config: ClientConfig,
+        routes: ClientRoutes,
+    ):
         self.config = config
         self.routes = routes
 
-    def _request(self, method: str,
-                 *args,
-                 **kwargs):
+    def _request(
+        self, method: str,
+        *args,
+        **kwargs,
+    ):
         while True:
-            res = requests.request(method=method,
-                                   verify=False,
-                                   *args, **kwargs)
+            res = requests.request(
+                method=method,
+                verify=False,
+                *args,
+                **kwargs,
+            )
             if res.ok:
                 break
             else:
@@ -109,13 +134,15 @@ class Client:
 
         return res
 
-    def get_summoner_by_summonername(self,
-                                     summoner_name: str,
-                                     ):
-        res = self._request(method='GET',
-                            url=self.routes.get_summoner_by_summonername(summoner_name=summoner_name),
-                            headers={'X-Riot-Token': self.config.token},
-                            ).json()
+    def get_summoner_by_summonername(
+        self,
+        summoner_name: str,
+    ):
+        res = self._request(
+            method='GET',
+            url=self.routes.get_summoner_by_summonername(summoner_name=summoner_name),
+            headers={'X-Riot-Token': self.config.token},
+        ).json()
         return dtos.summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
@@ -126,13 +153,15 @@ class Client:
             summoner_level=res['summonerLevel'],
         )
 
-    def get_summoner_by_account_id(self,
-                                   account_id: str,
-                                   ):
-        res = self._request(method='GET',
-                            url=self.routes.get_summoner_by_account_id(account_id=account_id),
-                            headers={'X-Riot-Token': self.config.token},
-                            ).json()
+    def get_summoner_by_account_id(
+        self,
+        account_id: str,
+    ):
+        res = self._request(
+            method='GET',
+            url=self.routes.get_summoner_by_account_id(account_id=account_id),
+            headers={'X-Riot-Token': self.config.token},
+            ).json()
         return dtos.summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
@@ -143,13 +172,15 @@ class Client:
             summoner_level=res['summonerLevel'],
         )
 
-    def get_summoner_by_summoner_id(self,
-                                    summoner_id: str,
-                                    ):
-        res = self._request(method='GET',
-                            url=self.routes.get_summoner_by_summoner_id(summoner_id=summoner_id),
-                            headers={'X-Riot-Token': self.config.token},
-                            ).json()
+    def get_summoner_by_summoner_id(
+        self,
+        summoner_id: str,
+    ):
+        res = self._request(
+            method='GET',
+            url=self.routes.get_summoner_by_summoner_id(summoner_id=summoner_id),
+            headers={'X-Riot-Token': self.config.token},
+        ).json()
         return dtos.summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
@@ -160,14 +191,16 @@ class Client:
             summoner_level=res['summonerLevel'],
         )
 
-    def get_match_by_matchid(self,
-                             match_id: int,
-                             ) -> dtos.match.MatchDto:
+    def get_match_by_matchid(
+        self,
+        match_id: int,
+    ) -> dtos.match.MatchDto:
 
-        res = self._request(method='GET',
-                            url=self.routes.get_match_by_matchid(match_id=match_id),
-                            headers={'X-Riot-Token': self.config.token},
-                            ).json()
+        res = self._request(
+            method='GET',
+            url=self.routes.get_match_by_matchid(match_id=match_id),
+            headers={'X-Riot-Token': self.config.token},
+        ).json()
 
         participant_identities = []
         for participant_identity_raw in res['participantIdentities']:
@@ -391,18 +424,21 @@ class Client:
             participants=participants,
         )
 
-    def get_matchlist_by_accountid(self,
-                                   account_id: str,
-                                   begin_index=0,
-                                   end_index=100,
-                                   ):
-        res = self._request(method='GET',
-                            url=self.routes.get_matchlist_by_accountid(account_id=account_id),
-                            headers={'X-Riot-Token': self.config.token},
-                            params={'beginIndex': begin_index,
-                                    'endIndex': end_index,
-                                    },
-                            ).json()
+    def get_matchlist_by_accountid(
+        self,
+        account_id: str,
+        begin_index=0,
+        end_index=100,
+    ):
+        res = self._request(
+            method='GET',
+            url=self.routes.get_matchlist_by_accountid(account_id=account_id),
+            headers={'X-Riot-Token': self.config.token},
+            params={
+                'beginIndex': begin_index,
+                'endIndex': end_index,
+            },
+        ).json()
 
         matches = []
         for match in res['matches']:
@@ -424,13 +460,15 @@ class Client:
             matches=matches,
         )
 
-    def get_match_timeline_by_matchid(self,
-                                      match_id: str,
-                                      ):
-        res = self._request(method='GET',
-                            url=self.routes.get_match_timeline_by_matchid(match_id=match_id),
-                            headers={'X-Riot-Token': self.config.token},
-                            ).json()
+    def get_match_timeline_by_matchid(
+        self,
+        match_id: str,
+    ):
+        res = self._request(
+            method='GET',
+            url=self.routes.get_match_timeline_by_matchid(match_id=match_id),
+            headers={'X-Riot-Token': self.config.token},
+        ).json()
 
         frames = []
         for frame in res['frames']:
