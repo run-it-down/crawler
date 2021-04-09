@@ -3,12 +3,12 @@ import requests
 import time
 
 try:
-    import dtos.summoner
-    import dtos.match
-    import dtos.matchlist
-    import dtos.match_timeline
-    import model
-    import util
+    from common.dtos import match
+    from common.dtos import matchlist
+    from common.dtos import match_timeline
+    from common.dtos import summoner
+    from common import model
+    from common import util
 except ModuleNotFoundError:
     print('common package not in python path')
 
@@ -204,7 +204,7 @@ class Client:
 
         participant_identities = []
         for participant_identity_raw in res['participantIdentities']:
-            player = dtos.match.PlayerDto(
+            player = match.PlayerDto(
                 profile_icon=participant_identity_raw['player']['profileIcon'],
                 account_id=participant_identity_raw['player']['accountId'],
                 match_history_uri=participant_identity_raw['player']['matchHistoryUri'],
@@ -214,7 +214,7 @@ class Client:
                 summoner_id=participant_identity_raw['player']['summonerId'],
                 platform_id=participant_identity_raw['player']['platformId'],
             )
-            participant_identities.append(dtos.match.ParticipantIdentityDto(
+            participant_identities.append(match.ParticipantIdentityDto(
                 participant_id=participant_identity_raw['participantId'],
                 player=player,
             ))
@@ -223,12 +223,12 @@ class Client:
         for team_raw in res['teams']:
             bans = []
             for ban_dto in team_raw['bans']:
-                bans.append(dtos.match.TeamBansDto(
+                bans.append(match.TeamBansDto(
                     champion_id=ban_dto['championId'],
                     pick_turn=ban_dto['pickTurn'],
                 ))
 
-            teams.append(dtos.match.TeamStatsDto(
+            teams.append(match.TeamStatsDto(
                 tower_kills=team_raw['towerKills'],
                 rift_herald_kills=team_raw['riftHeraldKills'],
                 first_blood=team_raw['firstBlood'],
@@ -252,7 +252,7 @@ class Client:
             runes = []
             try:
                 for rune_raw in participant_raw['runes']:
-                    runes.append(dtos.match.RuneDto(
+                    runes.append(match.RuneDto(
                         rune_id=rune_raw['runeId'],
                         rank=rune_raw['rank'],
                     ))
@@ -373,7 +373,7 @@ class Client:
                 stat_perk2=participant_raw['stats'].get('statPerk2'),
             )
             # the following deltas seem optional, therefore the inline if's
-            timeline = dtos.match.ParticipantTimelineDto(
+            timeline = match.ParticipantTimelineDto(
                 participant_id=participant_raw['timeline']['participantId'],
                 cs_diff_per_min_deltas=participant_raw['timeline']['csDiffPerMinDeltas'] if 'csDiffPerMinDeltas' in participant_raw['timeline'] else None,
                 damage_taken_per_min_deltas=participant_raw['timeline']['damageTakenPerMinDeltas'] if 'damageTakenPerMinDeltas' in participant_raw['timeline'] else None,
@@ -388,14 +388,14 @@ class Client:
             masteries = []
             try:
                 for masteries_raw in participant_raw['masteries']:
-                    masteries.append(dtos.match.MasteryDto(
+                    masteries.append(match.MasteryDto(
                         rank=masteries_raw['rank'],
                         master_id=masteries_raw['MasterId'],
                     ))
             except KeyError:
                 # List of legacy Mastery information. Not included for matches played with Runes Reforged.
                 pass
-            participants.append(dtos.match.ParticipantDto(
+            participants.append(match.ParticipantDto(
                 participant_id=participant_raw['participantId'],
                 champion_id=participant_raw['championId'],
                 runes=runes,
@@ -408,7 +408,7 @@ class Client:
                 masteries=masteries,
             ))
 
-        return dtos.match.MatchDto(
+        return match.MatchDto(
             game_id=match_id,
             participant_identities=participant_identities,
             queue_id=res['queueId'],
@@ -442,7 +442,7 @@ class Client:
 
         matches = []
         for match in res['matches']:
-            matches.append(dtos.matchlist.MatchReferenceDto(
+            matches.append(matchlist.MatchReferenceDto(
                 game_id=match['gameId'],
                 role=match['role'],
                 season=match['season'],
@@ -527,13 +527,13 @@ class Client:
                     victim_id=event.get('victimId'),
                 ))
 
-            frames.append(dtos.match_timeline.MatchFrameDto(
+            frames.append(match_timeline.MatchFrameDto(
                 participant_frames=participants_frames,
                 events=events,
                 timestamp=frame['timestamp'],
             ))
 
-        return dtos.match_timeline.MatchTimelineDto(
+        return match_timeline.MatchTimelineDto(
             frames=frames,
             frame_interval=res['frameInterval']
         )

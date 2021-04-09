@@ -1,4 +1,17 @@
+import typing
+
+
 import client
+<<<<<<< Updated upstream
+=======
+try:
+    from common import database
+    from common import parser
+    from common import model
+    from common import util
+except ModuleNotFoundError:
+    print('common package not in python path')
+>>>>>>> Stashed changes
 
 import database
 import model
@@ -15,6 +28,7 @@ def post_summoner(riot_client: client.Client,
     conn = database.get_connection()
 
     summoner = riot_client.get_summoner_by_summonername(summoner_name=summoner_name)
+<<<<<<< Updated upstream
     matchlist = _get_matchlist_updates(summoner=summoner,
                                        conn=conn,
                                        riot_client=riot_client,
@@ -24,6 +38,36 @@ def post_summoner(riot_client: client.Client,
     for match_ref in matchlist.matches[:3]:
         match = riot_client.get_match_by_matchid(match_ref.game_id)
         database.insert_match(conn=conn, match=rid_parser.parse_match(match_dto=match))
+=======
+    summoner = parser.parse_summoner(summoner_dto=summoner)
+    database.insert_summoner(conn=conn,
+                             summoner=summoner,
+                             )
+
+    # matchlist
+    summoner_matches = _get_matchlist_updates(summoner=summoner,
+                                              conn=conn,
+                                              riot_client=riot_client,
+                                              )
+    if game_range:
+        for summoner_match in summoner_matches[game_range[0]:game_range[1]]:
+            database.insert_summoner_match(conn=conn,
+                                           summoner_match=summoner_match,
+                                           )
+    else:
+        for summoner_match in summoner_matches:
+            database.insert_summoner_match(conn=conn,
+                                           summoner_match=summoner_match,
+                                           )
+
+    # matchdetails
+    i = 1
+    for match_ref in summoner_matches:
+        logger.info(f'getting match {match_ref.game_id} ({i}/{len(matchlist.match_references)})')
+        match = riot_client.get_match_details_by_matchid(match_id=match_ref.game_id)
+        if match.game_mode != 'CLASSIC':
+            continue
+>>>>>>> Stashed changes
 
         for team in match.teams:
             database.insert_team(conn=conn, team=rid_parser.parse_team(team_dto=team,
@@ -82,7 +126,12 @@ def post_summoner(riot_client: client.Client,
 def _get_matchlist_updates(summoner: model.Summoner,
                            riot_client: client.Client,
                            conn,
+<<<<<<< Updated upstream
                            ) -> dtos.matchlist.MatchlistDto:
+=======
+                           ) -> typing.List[model.SummonerMatch]:
+
+>>>>>>> Stashed changes
     # get count of matches pro summoner
     i = database.select_count_summoner_match(conn=conn,
                                              account_id=summoner.account_id)
@@ -109,4 +158,10 @@ def _get_matchlist_updates(summoner: model.Summoner,
             # no new matches found
             break
 
+<<<<<<< Updated upstream
     return matchlist
+=======
+    logger.info(f'{len(matchlist.matches)} new games')
+    return parser.parse_summoner_matches(matchlist_dto=matchlist,
+                                         account_id=summoner.account_id)
+>>>>>>> Stashed changes
