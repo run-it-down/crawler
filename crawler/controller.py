@@ -1,5 +1,13 @@
 import client
 
+try:
+    import database
+    import parser
+    import model
+    import util
+except ModuleNotFoundError:
+    print('common package not in python path')
+
 import database
 import model
 import util
@@ -20,8 +28,7 @@ def post_summoner(riot_client: client.Client,
                                        riot_client=riot_client,
                                        )
 
-    # TODO remove hardcoded gamerange
-    for match_ref in matchlist.matches[:3]:
+    for match_ref in matchlist.matches:
         match = riot_client.get_match_by_matchid(match_ref.game_id)
         database.insert_match(conn=conn, match=rid_parser.parse_match(match_dto=match))
 
@@ -109,6 +116,7 @@ def _get_matchlist_updates(summoner: model.Summoner,
             # no new matches found
             break
 
+    logger.info(f'{len(matchlist.matches)} new games')
     return matchlist
 
 
