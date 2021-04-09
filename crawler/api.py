@@ -16,6 +16,17 @@ logger = util.Logger(__name__)
 
 
 class Summoner:
+    def on_get(self, req, resp):
+        logger.info('checking if summoner exists')
+        params = req.params
+        if "summoner" not in params:
+            resp.status = falcon.HTTP_BAD_REQUEST
+        else:
+            summoner = controller.summoner_exists(params["summoner"])
+            if summoner is None:
+                resp.status = falcon.HTTP_NOT_FOUND
+            else:
+                resp.status = falcon.HTTP_OK
 
     def on_post(self, req, resp):
         logger.info('crawling')
@@ -54,3 +65,6 @@ def create():
 
 
 application = create()
+
+import waitress
+waitress.serve(application, port=1000)

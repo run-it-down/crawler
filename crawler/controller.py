@@ -110,3 +110,10 @@ def _get_matchlist_updates(summoner: model.Summoner,
             break
 
     return matchlist
+
+
+def summoner_exists(summoner: str):
+    conn = database.get_connection()
+
+    summoner = database.select_summoner(conn=conn, summoner_name=summoner)
+    return summoner
