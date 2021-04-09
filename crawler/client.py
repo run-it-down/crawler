@@ -3,12 +3,12 @@ import requests
 import time
 
 try:
-    from common.dtos import match
-    from common.dtos import matchlist
-    from common.dtos import match_timeline
-    from common.dtos import summoner
-    from common import model
-    from common import util
+    from dtos import match
+    from dtos import matchlist
+    from dtos import match_timeline
+    from dtos import summoner
+    import model
+    import util
 except ModuleNotFoundError:
     print('common package not in python path')
 
@@ -143,7 +143,7 @@ class Client:
             url=self.routes.get_summoner_by_summonername(summoner_name=summoner_name),
             headers={'X-Riot-Token': self.config.token},
         ).json()
-        return dtos.summoner.SummonerDto(
+        return summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
             puuid=res['puuid'],
@@ -162,7 +162,7 @@ class Client:
             url=self.routes.get_summoner_by_account_id(account_id=account_id),
             headers={'X-Riot-Token': self.config.token},
             ).json()
-        return dtos.summoner.SummonerDto(
+        return summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
             puuid=res['puuid'],
@@ -181,7 +181,7 @@ class Client:
             url=self.routes.get_summoner_by_summoner_id(summoner_id=summoner_id),
             headers={'X-Riot-Token': self.config.token},
         ).json()
-        return dtos.summoner.SummonerDto(
+        return summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
             puuid=res['puuid'],
@@ -194,7 +194,7 @@ class Client:
     def get_match_by_matchid(
         self,
         match_id: int,
-    ) -> dtos.match.MatchDto:
+    ) -> match.MatchDto:
 
         res = self._request(
             method='GET',
@@ -259,7 +259,7 @@ class Client:
             except KeyError:
                 # List of legacy Rune information. Not included for matches played with Runes Reforged.
                 pass
-            stats = dtos.match.ParticipantStatsDto(
+            stats = match.ParticipantStatsDto(
                 item0=participant_raw['stats'].get('item0'),
                 item2=participant_raw['stats'].get('item2'),
                 total_units_healed=participant_raw['stats'].get('totalUnitsHealed'),
@@ -453,7 +453,7 @@ class Client:
                 timestamp=match['timestamp'],
             ))
 
-        return dtos.matchlist.MatchlistDto(
+        return matchlist.MatchlistDto(
             start_index=res['startIndex'],
             total_games=res['totalGames'],
             end_index=res['endIndex'],
@@ -476,11 +476,11 @@ class Client:
             for participants_frame_key in frame['participantFrames'].keys():
                 position = None
                 if 'position' in frame['participantFrames'][participants_frame_key]:
-                    position = dtos.match_timeline.MatchPositionDto(
+                    position = match_timeline.MatchPositionDto(
                         x=frame['participantFrames'][participants_frame_key]['position']['x'],
                         y=frame['participantFrames'][participants_frame_key]['position']['y'],
                     )
-                participants_frames[participants_frame_key] = dtos.match_timeline.MatchParticipantFrameDto(
+                participants_frames[participants_frame_key] = match_timeline.MatchParticipantFrameDto(
                     participant_id=frame['participantFrames'][participants_frame_key].get('participantId'),
                     minions_killed=frame['participantFrames'][participants_frame_key].get('minionsKilled'),
                     team_score=frame['participantFrames'][participants_frame_key].get('teamScore'),
@@ -497,11 +497,11 @@ class Client:
             for event in frame['events']:
                 position = None
                 if 'position' in event:
-                    position = dtos.match_timeline.MatchPositionDto(
+                    position = match_timeline.MatchPositionDto(
                         x=event['position']['x'],
                         y=event['position']['y'],
                     )
-                events.append(dtos.match_timeline.MatchEventDto(
+                events.append(match_timeline.MatchEventDto(
                     lane_type=event.get('laneType'),
                     skill_slot=event.get('skillShot'),
                     ascended_type=event.get('ascendedType'),

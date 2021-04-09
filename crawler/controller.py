@@ -1,12 +1,9 @@
-import typing
-
-
 import client
 try:
-    from common import database
-    from common import parser
-    from common import model
-    from common import util
+    import database
+    import parser
+    import model
+    import util
 except ModuleNotFoundError:
     print('common package not in python path')
 
