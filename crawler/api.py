@@ -29,8 +29,8 @@ class Summoner:
                 resp.status = falcon.HTTP_OK
 
     def on_post(self, req, resp):
-        logger.info('crawling')
         body = json.loads(req.stream.read())
+        logger.info(f'crawling "{body["summonerName"]}"')
 
         # we dont check tls certificates so surpress the warning
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -45,11 +45,10 @@ class Summoner:
             routes=routes,
         )
 
-        controller.post_summoner(
-            riot_client=riot_client,
+        resp.status = controller.crawl_summoner(
+            rclient=riot_client,
             summoner_name=body['summonerName'],
         )
-        resp.status = falcon.HTTP_201
 
 
 def create():

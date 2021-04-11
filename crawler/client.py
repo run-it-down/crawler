@@ -142,7 +142,10 @@ class Client:
             method='GET',
             url=self.routes.get_summoner_by_summonername(summoner_name=summoner_name),
             headers={'X-Riot-Token': self.config.token},
-        ).json()
+        )
+        if res.status_code == 404:
+            return None
+        res = res.json()
         return summoner.SummonerDto(
             account_id=res['accountId'],
             id=res['id'],
