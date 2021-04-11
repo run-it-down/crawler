@@ -26,8 +26,6 @@ def crawl_summoner(
     summoner = rclient.get_summoner_by_summonername(
         summoner_name=summoner_name,
     )
-    if not summoner:
-        return falcon.HTTP_404
 
     # get matchlist
     match_ref_list = []
@@ -149,8 +147,6 @@ def crawl_summoner(
                     participant_frame=participant_frame,
                 )
         g += 1
-
-    return falcon.HTTP_201
 
 
 def summoner_exists(

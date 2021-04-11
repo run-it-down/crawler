@@ -1,4 +1,5 @@
 import json
+import threading
 import urllib3
 
 import falcon
@@ -45,10 +46,12 @@ class Summoner:
             routes=routes,
         )
 
-        resp.status = controller.crawl_summoner(
-            rclient=riot_client,
-            summoner_name=body['summonerName'],
+        t = threading.Thread(
+            target=controller.crawl_summoner,
+            args=(riot_client, body['summonerName']),
         )
+        t.start()
+        resp.status_code = falcon.HTTP_201
 
 
 def create():
