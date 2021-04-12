@@ -126,9 +126,8 @@ class Client:
                 break
             else:
                 if res.status_code != 429:
-                    msg = f'{method} request to url {res.url} failed with {res.status_code=} {res.reason=}'
-                    raise RiotAPINotOkayException(res=res, msg=msg)
-
+                    logger.warn('Quota limit, waiting ...')
+                    
                 # triggered if quota limit is reached, add some delay to avoid firewall
                 time.sleep(5)
 
