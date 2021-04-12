@@ -68,24 +68,32 @@ def crawl_summoner(
                     game_id=match.game_id
                 )
             )
-        identities = {}  # Key-Value-Store to match participants later on
-        for identity in match.participant_identities:
-            summoner = rclient.get_summoner_by_account_id(
-                identity.player.current_account_id,
-            )
-            database.insert_summoner(
-                conn=conn,
-                summoner=rid_parser.parse_summoner(summoner),
-            )
 
-            database.insert_summoner_match(
-                conn=conn,
-                summoner_match=model.SummonerMatch(
-                    game_id=match.game_id,
-                    account_id=summoner.account_id,
+        def _iterate_identities():
+            identities = {}  # Key-Value-Store to match participants later on
+            for identity in match.participant_identities:
+                summoner = rclient.get_summoner_by_account_id(
+                    identity.player.current_account_id,
                 )
-            )
-            identities[identity.participant_id] = identity.player.current_account_id
+                database.insert_summoner(
+                    conn=conn,
+                    summoner=rid_parser.parse_summoner(summoner),
+                )
+
+                if not database.insert_summoner_match(
+                    conn=conn,
+                    summoner_match=model.SummonerMatch(
+                        game_id=match.game_id,
+                        account_id=summoner.account_id,
+                    )
+                ):
+                    return None
+                identities[identity.participant_id] = identity.player.current_account_id
+            return identities
+
+        identities = _iterate_identities()
+        if not identities:
+            continue
 
         participants = {}
         for participant_dto in match.participants:
