@@ -3,6 +3,7 @@ import threading
 import urllib3
 
 import falcon
+import psutil
 
 import client
 import controller
@@ -54,9 +55,19 @@ class Summoner:
         resp.status_code = falcon.HTTP_201
 
 
+class Status:
+
+    def on_get(self, req, resp):
+        cpu = psutil.cpu_percent()
+        data = '{"cpu": ' + str(cpu) + '}'
+        resp.text = data
+        resp.status = falcon.HTTP_OK
+
+
 def create():
-    api = falcon.API()
+    api = falcon.App()
     api.add_route('/', Summoner())
+    api.add_route('/status', Status())
     logger.info('falcon initialized')
 
     conn = database.get_connection()
