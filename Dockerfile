@@ -1,6 +1,8 @@
 FROM alpine:3.12.0
 
 RUN apk update
+RUN apk add libc-dev
+RUN apk add linux-headers
 RUN apk add postgresql-dev gcc python3-dev musl-dev
 RUN apk add python3
 RUN apk add --update py-pip
